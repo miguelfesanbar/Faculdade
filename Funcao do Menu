@@ -1,0 +1,13 @@
+int menu() {
+     int opcao;
+     printf("===============================================\t\n");
+     printf("===================BAFOMETRO===================\t\n");
+     printf("===============================================\t\n");
+     printf("[1] - Inserir Nome e Medicao \n");
+     printf("[2] - Relatorio de Medicoes \n");
+     printf("[3] - Sair \n");
+     printf("\nEscolha uma opcao: ");
+     scanf("%d", &opcao);
+     system("cls");
+     return opcao;
+}
