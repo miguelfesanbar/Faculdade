@@ -1,0 +1,180 @@
+                        #include <stdio.h>
+#include <stdlib.h>
+
+FILE* AbreArquivo(char modo, char caminho[30]){
+    FILE *arquivo;
+    switch(modo){
+        case 'g':
+            arquivo = fopen(caminho, "wt");
+            break;
+        case 'l':
+            arquivo = fopen(caminho, "rt");
+            break;
+        case 'a':
+            arquivo = fopen(caminho, "a");
+            break;
+    }
+    if(arquivo==NULL){
+        printf("Nao foi possivel abrir o arquivo");
+        exit(0);
+    }
+    return arquivo;
+}
+
+void FechaArquivo(FILE *arquivo){
+    fclose(arquivo);
+}
+
+void Cadastra(int dia, int mes, int ano, char nome[30], int cpf, float nivA){
+    FILE *arquivo;
+    arquivo = AbreArquivo('a', "relatorio.txt");
+    fprintf(arquivo, "%d %d %d %s %d %f\n", dia, mes, ano, nome, cpf, nivA);
+    FechaArquivo(arquivo);
+}
+void Listar(){
+    FILE *arquivo;
+    int dia, mes, ano,cpf;
+    char nome[30];
+    float nivA;
+
+    arquivo = AbreArquivo('l', "relatorio.txt");
+
+    while(!feof(arquivo)){ //Enquanto nao for fir do arquivo ele vai ler
+        fscanf(arquivo,"%d %d %d %s %d %f ", &dia, &mes, &ano, &nome, &cpf, &nivA);
+        printf("Data: %d/%d/%d - Nome: %s - CPF: %d - Nivel de Alcool: %.2f\n", dia, mes, ano, nome, cpf, nivA);
+    }
+    FechaArquivo(arquivo);
+}
+
+int menu(){
+    int opcao;
+    printf("===============================================\t\n");
+    printf("===================BAFOMETRO===================\t\n");
+    printf("===============================================\t\n");
+    printf("[1] - INSERIR DADOS \n");
+    printf("[2] - IMPRIMIR RELATORIO \n");
+    printf("[3] - ESTATISTICAS \n");
+    printf("[4] - SAIR \n");
+    printf("\nEscolha uma opcao: ");
+    scanf("%d", &opcao);
+    system("cls");
+    return opcao;
+}
+
+int main(){
+    char nome[30], sancao[30], encaminha[30];
+    int data, dia, mes, ano, cpf, embriagado, opcaoSelecionada, respTeste, vMulta, detidos, liberados, totMed, teste,liberado,veiculos,multa,detento,opcao,quantidade,i,recusa;
+    float nivA, alcool,porcentagemdeRecusa,porcentagemdeLiberados,porcentagemdeVeiculos,porcentagemdeMulta,porcentagedeDetento;
+    do{
+        system("cls");
+        opcaoSelecionada = menu();
+        totMed = 0;
+        switch(opcaoSelecionada){
+             case 1:
+                printf("\nDigite a data de hoje[dd/mm/aa]: ");
+                fflush(stdin);
+                scanf("%d/%d/%d", &dia, &mes, &ano);
+                printf("\nDigite o nome: ");
+                fflush(stdin);
+                gets(nome);
+                printf("\nDigite os tres primeiros digitos do cpf: ");
+                fflush(stdin);
+                scanf("%d", &cpf);
+                printf("\nRealize a medicao: ");
+                scanf("%f", &nivA);
+                if(nivA < 0.05){
+                    liberados = liberados + 1;
+                }
+                else{
+                    detidos = detidos + 1;
+                    totMed = liberados + detidos;
+                    }
+
+                    Cadastra(dia, mes, ano, nome, cpf, nivA);
+                    system("pause");
+                break;
+
+             case 2:
+                Listar();
+                system("pause");
+                break;
+
+             case 3:
+                printf ("quantos motoristas fizeram o teste?");
+                fflush(stdin);
+                scanf ("%d",&quantidade);
+                for (i = 1;i <=quantidade;i++)
+                {
+                    printf ("O indivíduo se recusou a fazer o teste? [1-SIM/2-NAO] ");
+                    scanf ("%d",&teste);
+                    if (teste==1)
+                    {
+                        recusa=recusa+1;
+                    }
+                    else if (teste==2)
+                    {
+                        printf ("Digite a quantidade de alcool lida no bafometro: ");
+                        fflush(stdin);
+                        scanf ("%f",&alcool);
+                        fflush(stdin);
+
+                        if (alcool <=0.2)
+                        {
+                            printf ("Motorista liberado!\n");
+                            liberado=liberado+1;
+                        }
+                        else if ((alcool>0.2) && (alcool<=0.3))
+                        {
+                            printf ("Retenção do veículo e da carteira! O veiculo sera liberado assim que um condutor habilitado se apresentar");
+                            veiculos=veiculos+1;
+                        }
+                        else if ((alcool>0.3)&& (alcool<0.6))
+                        {
+                            printf ("Multa e sete pontos na carteira!");
+                            fflush(stdin);
+                            multa=multa+1;
+                        }
+                        else if (alcool>=0.6)
+                        {
+                            printf ("Motorista preso!");
+                            fflush(stdin);
+                            detento=detento+1;
+                        }
+
+                    }
+                }
+                fflush(stdin);
+                porcentagemdeRecusa=(recusa/quantidade);
+                porcentagemdeLiberados=(liberado/quantidade);
+                porcentagemdeVeiculos=(veiculos/quantidade);
+                porcentagemdeMulta=(multa/quantidade);
+                porcentagedeDetento=(detento/quantidade);
+                system("pause");
+                printf ("\n\n||-------------------------------RELATORIO----------------------------||\n\n");
+                printf ("      Quantidade de motoristas abordados %d\n",quantidade);
+                printf ("      Porcentagem dos que se recusaram a fazer o teste: %2.f\n",porcentagemdeRecusa);
+                printf ("      Porcentagem de motoristas liberados: %2.f\n",porcentagemdeLiberados);
+                printf ("      Porcentagem de medidas administrativas:%2.f\n",porcentagemdeVeiculos);
+                printf ("      Porcentagem de multas aplicadas: %2.f\n",porcentagemdeMulta);
+                printf ("      Porcentagem de motoristas presos: %2.f\n",porcentagedeDetento);
+                break;
+             case 4:
+                printf("\nObrigado!\n");
+                system("pause");
+                break;
+
+             default:
+                printf("----- Opcao Invalida -----");
+             system("pause");
+                break;
+        }
+
+
+
+
+     }while (opcaoSelecionada != 4);
+
+    system("pause");
+    return 0;
+}
+
