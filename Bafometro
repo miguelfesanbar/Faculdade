@@ -1,0 +1,136 @@
+//codigo base com rotação de tela
+//codigo centralizando linhas
+//ultima modificação 26/06/2017
+#include <Adafruit_GFX.h>
+#include <Adafruit_ST7735.h>
+#include <SPI.h>
+
+#define TFT_DC            9     // Sainsmart RS/DC
+#define TFT_RST           8     // Sainsmart RES
+#define TFT_CS           10     // Sainsmart CS
+
+static Adafruit_ST7735 TFT = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
+// Tempo de aquecimento adicionado 30/06
+int tempo_aquecimento = 300;
+
+unsigned long time;
+int status = 1;
+
+int posicao1;
+
+#define TFTW            128     // screen width
+#define TFTH            160     // screen height
+#define TFTW2            64     // half screen width
+#define TFTH2            80     // half screen height
+
+int valor_sensor = 0;  // le o valor do sensor
+int bufValor = 0;      // guarda o ultimo valor lido pelo sensor
+String estado = "";    // string com o estado da pessoa, de acordo com o valor do sensor
+String bufEstado = ""; // guarda o ultimo estado da pessoa
+
+unsigned long previousMillis = 0; // variavel para o delay sem delay
+
+void setup(){
+  TFT.initR(INITR_BLACKTAB);  // inica a tela preta
+   screen();                  // função que desenha no lcd
+}
+
+void loop() {
+  valor_sensor = analogRead(A1);  // lê valor do sensor
+  
+  unsigned long currentMillis = millis();  // atualiza o currente millis 
+  
+  if (currentMillis - previousMillis >= 300) {    //delay sem delay
+    dados();  // atualiza os valors do sensor
+    estadoCheck();  // atualiza o estado da pessoa
+    printEstado();  // printa o estado da pessoa
+    previousMillis = currentMillis; // atualiza o previous millis
+  }
+}
+
+void screen() {
+  TFT.fillScreen(ST7735_BLACK);  //preenche a tela com a cor branca
+
+    for(tempo_aquecimento>0;tempo_aquecimento--;){
+      TFT.fillScreen(ST7735_BLACK);
+    TFT.setRotation(1);//comando para rotação da tela
+    TFT.setTextSize(2); // define o tamanho do texto anterior: TFT.setTextSize(2);
+    TFT.setCursor( 23, 20); // define a posição do texto
+    TFT.println("Preparando");  // printa o textto
+    TFT.setTextSize(2); // define o tamanho do texto anterior: TFT.setTextSize(2);
+    TFT.setCursor( 60, 50); // define a posição do texto
+    TFT.println(tempo_aquecimento);  // printa o textto
+    delay(1000);
+    TFT.fillScreen(ST7735_BLACK);
+    }
+
+  
+  TFT.setRotation(1);//comando para rotação da tela
+  TFT.fillRect(20, TFTH2 - 38, TFTW-20, 1, ST7735_WHITE);  // desenha uma reta no display anterior: TFT.fillRect(10, TFTH2 - 20, TFTW-20, 1, ST7735_WHITE);
+  TFT.fillRect(20, TFTH2 + 14, TFTW-20, 1, ST7735_WHITE);  // desenha uma reta no display anterior: TFT.fillRect(10, TFTH2 + 32, TFTW-20, 1, ST7735_WHITE);
+  TFT.setTextColor(ST7735_WHITE); //define a cor do texto para branco
+  TFT.setTextSize(1); // define o tamanho do texto anterior: TFT.setTextSize(2);
+  TFT.setCursor( 20, TFTH2 - 34); // define a posição do texto
+  TFT.println("Valores");  // printa o textto
+  TFT.setTextSize(2);
+  TFT.setCursor( 23, 12); //anterior: TFT.setCursor( 10, 30);
+  TFT.println("BAFOMETRO");
+
+}
+
+void printEstado(){
+  
+    if(!estado.equals(bufEstado)){ // verifica se o ultimo estado é igual ao estado atual 
+        TFT.setTextColor(ST7735_BLACK);//WHITE
+        TFT.setTextSize(1);
+        TFT.setCursor( 32, TFTH2 + 27);
+        TFT.println(bufEstado); //printa a ultimo texto lido
+        
+        TFT.setTextColor(ST7735_WHITE);
+        TFT.setTextSize(1);
+        TFT.setCursor( 32, TFTH2 + 27);
+        TFT.println(estado);
+
+        bufEstado = estado; //guarda o ultimo estado lido
+      }
+  }
+
+void dados() {
+  if(abs(valor_sensor - bufValor) > 5){
+    TFT.setRotation(1); 
+    TFT.setTextColor(ST7735_BLACK);//black
+    TFT.setTextSize(3);
+    TFT.setCursor( 75, TFTH2 - 12);
+    TFT.println(bufValor);
+    
+    TFT.setTextColor(ST7735_WHITE);
+    TFT.setTextSize(3);
+    TFT.setCursor( 75, TFTH2 - 12);
+    TFT.println(valor_sensor);
+
+    bufValor = valor_sensor;
+  }
+}
+
+void estadoCheck(){
+  if (valor_sensor >= 0 and valor_sensor <= 50)
+  {
+    estado = "Voce nao bebeu";
+  }
+  else if (valor_sensor >= 51 and valor_sensor <= 200)
+  {
+    estado = "Bebeu 1 cerveja";
+  }
+  else if (valor_sensor >= 201 and valor_sensor <= 400)
+  {
+    estado = "Bebeu 2 cervejas";
+  }
+  else if (valor_sensor >= 401 and valor_sensor <= 600)
+  {
+    estado = "Voce cheira a 51";
+  }
+  else if (valor_sensor >= 601)
+  {
+    estado = "Voce esta bebado";
+  }
+}
